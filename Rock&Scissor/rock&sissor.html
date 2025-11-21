@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rock and Scegger</title>
+  <style>
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial; display:flex; justify-content:center; padding:24px; }
+    .game { width:360px; text-align:center; }
+    h1 { margin:0 0 12px 0; }
+    .score { margin-bottom: 12px; font-weight:600; }
+    .arena { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .choice { width:120px; }
+    .choice img { width:96px; height:96px; object-fit:contain; }
+    .buttons { display:flex; justify-content:center; gap:8px; margin-bottom:12px; }
+    button { padding:8px 12px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+    .result { font-size:15px; min-height:22px; margin-bottom:10px; }
+    footer { font-size:12px; color:#666; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <div class="game">
+    <h1>Rock and Scegger</h1>
+    <div class="score">You: <span id="youScore">0</span> — Computer: <span id="compScore">0</span></div>
+
+    <div class="arena">
+      <div class="choice">
+        <div>Computer</div>
+        <img id="compImg" src="images/default_comp.png" alt="comp">
+        <div id="compTxt">?</div>
+      </div>
+      <div style="font-weight:bold">VS</div>
+      <div class="choice">
+        <div>You</div>
+        <img id="youImg" src="images/default_you.png" alt="you">
+        <div id="youTxt">?</div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button data-choice="rock">Rock</button>
+      <button data-choice="paper">Paper</button>
+      <button data-choice="scissors">Scissors</button>
+    </div>
+
+    <div class="result" id="result"></div>
+    <div>
+      <button id="reset">Reset Score</button>
+    </div>
+    <footer>Tip: press R, P, or S keys to play quickly.</footer>
+  </div>
+
+  <script>
+    const choices = ['rock','paper','scissors'];
+    let youScore = 0, compScore = 0;
+
+    const youImg = document.getElementById('youImg');
+    const compImg = document.getElementById('compImg');
+    const youTxt = document.getElementById('youTxt');
+    const compTxt = document.getElementById('compTxt');
+    const resultEl = document.getElementById('result');
+    const youScoreEl = document.getElementById('youScore');
+    const compScoreEl = document.getElementById('compScore');
+
+    function setImages(choiceEl, name){
+      choiceEl.src = `images/${name}.png`;
+    }
+
+    function resolve(user, comp){
+      if(user === comp) return 'tie';
+      const wins = { rock: 'scissors', paper: 'rock', scissors: 'paper' };
+      return wins[user] === comp ? 'user' : 'comp';
+    }
+
+    function play(userChoice){
+      const compChoice = choices[Math.floor(Math.random()*choices.length)];
+      setImages(youImg, userChoice);
+      setImages(compImg, compChoice);
+
+      youTxt.textContent = userChoice;
+      compTxt.textContent = compChoice;
+
+      const res = resolve(userChoice, compChoice);
+      if(res === 'tie'){
+        resultEl.textContent = "It's a tie!";
+      } else if(res === 'user'){
+        youScore++;
+        youScoreEl.textContent = youScore;
+        resultEl.textContent = 'You win!';
+      } else {
+        compScore++;
+        compScoreEl.textContent = compScore;
+        resultEl.textContent = 'Computer wins!';
+      }
+    }
+
+    document.querySelectorAll('button[data-choice]').forEach(b=>{
+      b.addEventListener('click', ()=> play(b.dataset.choice));
+    });
+
+    document.getElementById('reset').addEventListener('click', ()=>{
+      youScore = 0;
+      compScore = 0;
+
+      youScoreEl.textContent = 0;
+      compScoreEl.textContent = 0;
+      resultEl.textContent = '';
+
+      // Fix: use local default images
+      youImg.src = "images/default_you.png";
+      compImg.src = "images/default_comp.png";
+
+      youTxt.textContent = '?';
+      compTxt.textContent = '?';
+    });
+
+    document.addEventListener('keydown', e=>{
+      const key = e.key.toLowerCase();
+      if(key === 'r') play('rock');
+      if(key === 'p') play('paper');
+      if(key === 's') play('scissors');
+    });
+  </script>
+</body>
+</html>
